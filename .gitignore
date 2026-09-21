@@ -1,0 +1,23 @@
+# macOS 系统文件
+.DS_Store
+
+# 编辑器配置
+.vscode/
+.workbuddy/
+
+# 编译产物（.cu 编译出来的可执行文件、目标文件）
+*.o
+*.obj
+*.out
+*.exe
+a.out
+build/
+bin/
+
+# CUDA / 临时文件
+*.i
+*.ii
+*.gpu
+*.ptx
+*.cubin
+*.fatbin
