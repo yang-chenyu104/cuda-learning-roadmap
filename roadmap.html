@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CUDA 60 天精通路线 — 从小白到专家</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 48px 24px;
+            text-align: center;
+        }
+        .header h1 { font-size: 32px; margin-bottom: 12px; }
+        .header p { font-size: 16px; opacity: 0.9; max-width: 700px; margin: 0 auto; }
+        .header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+        /* APOD Methodology */
+        .apod-section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .apod-section h2 { font-size: 22px; margin-bottom: 20px; color: #2d3748; }
+        .apod-flow {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .apod-step {
+            flex: 1;
+            min-width: 180px;
+            text-align: center;
+            padding: 20px 16px;
+            border-radius: 12px;
+            color: white;
+            position: relative;
+        }
+        .apod-step::after {
+            content: '→';
+            position: absolute;
+            right: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #cbd5e0;
+            z-index: 1;
+        }
+        .apod-step:last-child::after { display: none; }
+        .apod-step:nth-child(1) { background: #3b82f6; }
+        .apod-step:nth-child(2) { background: #8b5cf6; }
+        .apod-step:nth-child(3) { background: #ec4899; }
+        .apod-step:nth-child(4) { background: #10b981; }
+        .apod-step h3 { font-size: 18px; margin-bottom: 8px; }
+        .apod-step p { font-size: 13px; opacity: 0.9; }
+
+        /* Phase Overview */
+        .phases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .phase-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+        .phase-card:hover { transform: translateY(-4px); }
+        .phase-card:nth-child(1) { border-color: #3b82f6; }
+        .phase-card:nth-child(2) { border-color: #8b5cf6; }
+        .phase-card:nth-child(3) { border-color: #ec4899; }
+        .phase-card:nth-child(4) { border-color: #f59e0b; }
+        .phase-card:nth-child(5) { border-color: #10b981; }
+        .phase-card h3 { font-size: 18px; margin-bottom: 8px; }
+        .phase-card .days { font-size: 13px; color: #718096; margin-bottom: 8px; }
+        .phase-card .difficulty { font-size: 12px; color: #a0aec0; }
+        .phase-card .guide { font-size: 12px; color: #6366f1; margin-top: 8px; }
+
+        /* Timeline */
+        .timeline { position: relative; padding-left: 40px; }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b, #10b981);
+            border-radius: 2px;
+        }
+
+        .week-block {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            position: relative;
+        }
+        .week-block::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 28px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px;
+        }
+        .week-block:nth-child(1)::before { background: #3b82f6; box-shadow: 0 0 0 2px #3b82f6; }
+        .week-block:nth-child(2)::before { background: #3b82f6; box-shadow: 0 0 0 2px #3b82f6; }
+        .week-block:nth-child(3)::before { background: #8b5cf6; box-shadow: 0 0 0 2px #8b5cf6; }
+        .week-block:nth-child(4)::before { background: #8b5cf6; box-shadow: 0 0 0 2px #8b5cf6; }
+        .week-block:nth-child(5)::before { background: #8b5cf6; box-shadow: 0 0 0 2px #8b5cf6; }
+        .week-block:nth-child(6)::before { background: #ec4899; box-shadow: 0 0 0 2px #ec4899; }
+        .week-block:nth-child(7)::before { background: #f59e0b; box-shadow: 0 0 0 2px #f59e0b; }
+        .week-block:nth-child(8)::before { background: #f59e0b; box-shadow: 0 0 0 2px #f59e0b; }
+        .week-block:nth-child(9)::before { background: #10b981; box-shadow: 0 0 0 2px #10b981; }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .week-title { font-size: 18px; font-weight: 700; }
+        .week-tag {
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+        .tag-beginner { background: #3b82f6; }
+        .tag-intermediate { background: #8b5cf6; }
+        .tag-advanced { background: #ec4899; }
+        .tag-expert { background: #f59e0b; }
+        .tag-master { background: #10b981; }
+
+        .day-list { display: grid; gap: 8px; }
+        .day-item {
+            display: grid;
+            grid-template-columns: 40px 1fr auto;
+            gap: 12px;
+            align-items: start;
+            padding: 10px 14px;
+            background: #f7fafc;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+        .day-item:hover { background: #edf2f7; }
+        .day-num {
+            font-weight: 700;
+            font-size: 14px;
+            color: #4a5568;
+            text-align: center;
+            padding-top: 2px;
+        }
+        .day-info h4 { font-size: 14px; color: #2d3748; }
+        .day-info p { font-size: 12px; color: #718096; }
+        .day-guide {
+            font-size: 11px;
+            color: #6366f1;
+            white-space: nowrap;
+            font-family: monospace;
+        }
+
+        /* GPU Card */
+        .gpu-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+        .gpu-card h2 { font-size: 22px; margin-bottom: 20px; }
+        .gpu-specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .spec-item {
+            background: rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .spec-item .label { font-size: 12px; opacity: 0.7; margin-bottom: 4px; }
+        .spec-item .value { font-size: 20px; font-weight: 700; }
+        .spec-item .note { font-size: 11px; opacity: 0.6; margin-top: 4px; }
+
+        /* Guide Mapping */
+        .guide-section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .guide-section h2 { font-size: 22px; margin-bottom: 20px; }
+        .guide-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .guide-table th {
+            text-align: left;
+            padding: 10px 12px;
+            background: #f7fafc;
+            border-bottom: 2px solid #e2e8f0;
+            font-weight: 600;
+        }
+        .guide-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #edf2f7;
+        }
+        .guide-table tr:hover { background: #f7fafc; }
+        .pg-badge { background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+        .bpg-badge { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+
+        /* Progress Tracker */
+        .progress-section {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b, #10b981);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 12px;
+        }
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        .progress-stats strong { color: #2d3748; }
+
+        .checklist { margin-top: 16px; }
+        .checklist label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            cursor: pointer;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        .checklist input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .checklist input[type="checkbox"]:checked + span {
+            text-decoration: line-through;
+            color: #a0aec0;
+        }
+
+        /* Quick Start */
+        .quick-start {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+        .quick-start .comment { color: #64748b; }
+        .quick-start .cmd { color: #38bdf8; }
+        .quick-start .highlight { color: #fbbf24; }
+
+        .footer {
+            text-align: center;
+            padding: 32px 24px;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 24px; }
+            .apod-step::after { display: none; }
+            .day-item { grid-template-columns: 30px 1fr; }
+            .day-guide { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>CUDA 60 天精通路线</h1>
+        <p>基于 NVIDIA 官方《CUDA C++ Programming Guide》(598页) 和《Best Practices Guide》(118页) 系统化设计</p>
+        <div class="badge">从小白到专家 · 每天一个 CUDA 代码 · RTX 4090 优化</div>
+    </div>
+
+    <div class="container">
+        <!-- APOD Methodology -->
+        <div class="apod-section">
+            <h2>NVIDIA 官方 APOD 优化方法论</h2>
+            <p style="color:#718096; margin-bottom:20px;">本路线遵循 NVIDIA 推荐的 Assess → Parallelize → Optimize → Deploy 循环优化流程</p>
+            <div class="apod-flow">
+                <div class="apod-step">
+                    <h3>1. Assess</h3>
+                    <p>评估应用，找到热点<br>分析瓶颈 (Amdahl定律)</p>
+                </div>
+                <div class="apod-step">
+                    <h3>2. Parallelize</h3>
+                    <p>并行化热点代码<br>使用库或手写 CUDA</p>
+                </div>
+                <div class="apod-step">
+                    <h3>3. Optimize</h3>
+                    <p>三层优化<br>内存 · 指令 · 执行配置</p>
+                </div>
+                <div class="apod-step">
+                    <h3>4. Deploy</h3>
+                    <p>部署到生产环境<br>兼容性 · 错误处理</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RTX 4090 Specs -->
+        <div class="gpu-card">
+            <h2>RTX 4090 开发环境</h2>
+            <div class="gpu-specs">
+                <div class="spec-item">
+                    <div class="label">架构</div>
+                    <div class="value">Ada Lovelace</div>
+                    <div class="note">sm_89 (Makefile已配置)</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">SM 数量</div>
+                    <div class="value">128</div>
+                    <div class="note">最大 262,144 并发线程</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">显存</div>
+                    <div class="value">24 GB</div>
+                    <div class="note">GDDR6X</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">显存带宽</div>
+                    <div class="value">1008 GB/s</div>
+                    <div class="note">优化目标: 有效带宽 > 600 GB/s</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">L2 缓存</div>
+                    <div class="value">72 MB</div>
+                    <div class="note">大缓存利于数据复用</div>
+                </div>
+                <div class="spec-item">
+                    <div class="label">Tensor Cores</div>
+                    <div class="value">第 4 代</div>
+                    <div class="note">FP16/BF16/INT8/FP8</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase Overview -->
+        <div class="phases">
+            <div class="phase-card">
+                <h3>Phase 1: 入门</h3>
+                <div class="days">Day 01-14 · Week 1-2</div>
+                <div class="difficulty">难度: ★☆☆☆☆</div>
+                <div class="guide">PG Ch3-5, BPG Ch2-3</div>
+            </div>
+            <div class="phase-card">
+                <h3>Phase 2: 进阶</h3>
+                <div class="days">Day 15-30 · Week 3-5</div>
+                <div class="difficulty">难度: ★★☆☆☆</div>
+                <div class="guide">PG Ch10, BPG Ch12</div>
+            </div>
+            <div class="phase-card">
+                <h3>Phase 3: 高级</h3>
+                <div class="days">Day 31-37 · Week 6</div>
+                <div class="difficulty">难度: ★★★☆☆</div>
+                <div class="guide">BPG Ch8-13, PG Ch8</div>
+            </div>
+            <div class="phase-card">
+                <h3>Phase 4: 专家</h3>
+                <div class="days">Day 38-52 · Week 7-8</div>
+                <div class="difficulty">难度: ★★★★☆</div>
+                <div class="guide">PG Ch10.19-10.28, Ch12-14, Ch20</div>
+            </div>
+            <div class="phase-card">
+                <h3>Phase 5: 大师</h3>
+                <div class="days">Day 53-60 · Week 9</div>
+                <div class="difficulty">难度: ★★★★★</div>
+                <div class="guide">全部综合 · APOD 全流程</div>
+            </div>
+        </div>
+
+        <!-- Quick Start -->
+        <div class="quick-start">
+<span class="comment"># 1. 传到服务器</span>
+<span class="cmd">scp</span> -r cuda-learning-roadmap/ user@server:~/
+
+<span class="comment"># 2. SSH 登录，运行环境检查</span>
+<span class="cmd">ssh</span> user@server
+<span class="cmd">cd</span> cuda-learning-roadmap && <span class="cmd">bash</span> setup.sh
+
+<span class="comment"># 3. 开始学习</span>
+<span class="cmd">make</span> run01    <span class="comment"># Day 01: Hello CUDA</span>
+<span class="cmd">make</span> run40    <span class="comment"># Day 40: Tensor Cores / WMMA</span>
+<span class="cmd">make</span> run60    <span class="comment"># Day 60: 毕业项目 — 图像处理管线</span>
+<span class="cmd">make</span> run-all  <span class="comment"># 运行全部 60 天</span>
+<span class="cmd">make</span> clean    <span class="comment"># 清理编译产物</span>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline">
+
+            <!-- Week 1 -->
+            <div class="week-block">
+                <div class="week-header">
+                    <span class="week-title">Week 1: CUDA 基础</span>
+                    <span class="week-tag tag-beginner">入门 · Day 01-07</span>
+                </div>
+                <div class="day-list">
+                    <div class="day-item"><div class="day-num">01</div><div class="day-info"><h4>Hello CUDA</h4><p>Kernel 编写, grid/block/thread, H2D/D2H 传输</p></div><div class="day-guide">PG 3-5.1</div></div>
+                    <div class="day-item"><div class="day-num">02</div><div class="day-info"><h4>设备查询</h4><p>GPU 硬件参数, 计算能力, 配置选择</p></div><div class="day-guide">PG 5.6, BPG 15</div></div>
+                    <div class="day-item"><div class="day-num">03</div><div class="day-info"><h4>向量运算</h4><p>Grid/Block 配置对比, grid-stride loop</p></div><div class="day-guide">PG 5.2</div></div>
+                    <div class="day-item"><div class="day-num">04</div><div class="day-info"><h4>错误处理</h4><p>CUDA_CHECK 宏, 常见错误类型</p></div><div class="day-guide">PG 6.2.12, BPG 14</div></div>
+                    <div class="day-item"><div class="day-num">05</div><div class="day-info"><h4>GPU 计时</h4><p>CUDA Event 计时, CPU/GPU 性能对比</p></div><div class="day-guide">BPG 9.1</div></div>
+                    <div class="day-item"><div class="day-num">06</div><div class="day-info"><h4>点积归约</h4><p>并行归约, __syncthreads, 共享内存</p></div><div class="day-guide">PG 10.14</div></div>
+                    <div class="day-item"><div class="day-num">07</div><div class="day-info"><h4>综合练习</h4><p>1D 卷积 (朴素 vs 共享内存)</p></div><div class="day-guide">PG 5.3</div></div>
+                </div>
+            </div>
+
+            <!-- Week 2 -->
+            <div class="week-block">
+                <div class="week-header">
+                    <span class="week-title">Week 2: 内存模型</span>
+                    <span class="week-tag tag-beginner">入门 · Day 08-14</span>
+                </div>
+                <div class="day-list">
+                    <div class="day-item"><div class="day-num">08</div><div class="day-info"><h4>共享内存</h4><p>__shared__, bank conflict, halo region</p></div><div class="day-guide">PG 6.2.4, BPG 10.2.3</div></div>
+                    <div class="day-item"><div class="day-num">09</div><div class="day-info"><h4>矩阵转置</h4><p>合并访问, padding 消除冲突</p></div><div class="day-guide">BPG 10.2.1</div></div>
+                    <div class="day-item"><div class="day-num">10</div><div class="day-info"><h4>常量内存</h4><p>__constant__, 广播机制, 缓存</p></div><div class="day-guide">PG 10.2.2, BPG 10.2.5</div></div>
+                    <div class="day-item"><div class="day-num">11</div><div class="day-info"><h4>纹理内存</h4><p>2D 空间局部性, 硬件插值</p></div><div class="day-guide">PG 6.2.12, BPG 10.2.4</div></div>
+                    <div class="day-item"><div class="day-num">12</div><div class="day-info"><h4>合并访问</h4><p>stride 访问, AoS vs SoA</p></div><div class="day-guide">BPG 10.2.1</div></div>
+                    <div class="day-item"><div class="day-num">13</div><div class="day-info"><h4>固定内存</h4><p>pinned memory, 异步传输, 多流重叠</p></div><div class="day-guide">PG 6.2.6, BPG 10.1.1</div></div>
+                    <div class="day-item"><div class="day-num">14</div><div class="day-info"><h4>分块矩阵乘法</h4><p>Tiled matmul, 综合内存优化</p></div><div class="day-guide">BPG 10.2.3</div></div>
+                </div>
+            </div>
+
+            <!-- Week 3 -->
+            <div class="week-block">
+                <div class="week-header">
+                    <span class="week-title">Week 3: 并行模式</span>
+                    <span class="week-tag tag-intermediate">进阶 · Day 15-21</span>
+                </div>
+                <div class="day-list">
+                    <div class="day-item"><div class="day-num">15</div><div class="day-info"><h4>归约优化</h4><p>4 种归约策略, warp divergence</p></div><div class="day-guide">BPG 12</div></div>
+                    <div class="day-item"><div class="day-num">16</div><div class="day-info"><h4>前缀和</h4><p>Hillis-Steele, Blelloch scan</p></div><div class="day-guide">PG 10.22</div></div>
+                    <div class="day-item"><div class="day-num">17</div><div class="day-info"><h4>矩阵乘法进阶</h4><p>寄存器 tile, 计算强度</p></div><div class="day-guide">BPG 10.2.3</div></div>
+                    <div class="day-item"><div class="day-num">18</div><div class="day-info"><h4>直方图</h4><p>atomicAdd, privatization</p></div><div class="day-guide">PG 10.14, BPG 10.2.3</div></div>
+                    <div class="day-item"><div class="day-num">19</div><div class="day-info"><h4>流压缩</h4><p>predicate → scan → scatter</p></div><div class="day-guide">PG 10.22</div></div>
+                    <div class="day-item"><div class="day-num">20</div><div class="day-info"><h4>双调排序</h4><p>并行排序网络</p></div><div class="day-guide">BPG 12</div></div>
+                    <div class="day-item"><div class="day-num">21</div><div class="day-info"><h4>K-Means 聚类</h4><p>归约 + 原子操作 + 综合应用</p></div><div class="day-guide">综合</div></div>
+                </div>
+            </div>
+
+            <!-- Week 4 -->
+            <div class="week-block">
+                <div class="week-header">
+                    <span class="week-title">Week 4: 高级主题</span>
+                    <span class="week-tag tag-intermediate">进阶 · Day 22-28</span>
+                </div>
+                <div class="day-list">
+                    <div class="day-item"><div class="day-num">22</div><div class="day-info"><h4>Warp 编程</h4><p>warp divergence, __ballot_sync</p></div><div class="day-guide">PG 10.19</div></div>
+                    <div class="day-item"><div class="day-num">23</div><div class="day-info"><h4>Warp Shuffle</h4><p>__shfl_sync, 寄存器间交换</p></div><div class="day-guide">PG 10.22</div></div>
+                    <div class="day-item"><div class="day-num">24</div><div class="day-info"><h4>动态并行</h4><p>GPU 启动 GPU, 递归 kernel</p></div><div class="day-guide">PG Ch15</div></div>
+                    <div class="day-item"><div class="day-num">25</div><div class="day-info"><h4>流与事件</h4><p>多流重叠, 异步执行, 事件同步</p></div><div class="day-guide">PG 6.2.8</div></div>
+                    <div class="day-item"><div class="day-num">26</div><div class="day-info"><h4>多 GPU</h4><p>多设备管理, P2P, 数据并行</p></div><div class="day-guide">PG 6.2.9</div></div>
+                    <div class="day-item"><div class="day-num">27</div><div class="day-info"><h4>CUDA 库</h4><p>cuBLAS, 库 vs 手写对比</p></div><div class="day-guide">BPG 6.1</div></div>
+                    <div class="day-item"><div class="day-num">28</div><div class="day-info"><h4>Thrust</h4><p>device_vector, 算法库, functor</p></div><div class="day-guide">BPG 6.1</div></div>
+                </div>
+            </div>
+
+            <!-- Week 5 -->
+            <div class="week-block">
+                <div class="week-header">
+                    <span class="week-title">Week 5: 实战项目</span>
+                    <span class="week-tag tag-intermediate">进阶 · Day 29-30</span>
+                </div>
+                <div class="day-list">
+                    <div class="day-item"><div class="day-num">29</div><div class="day-info"><h4>2D 图像卷积</h4><p>tiled 卷积, 常量内存, 边界处理</p></div><div class="day-guide">BPG 10.2.3</div></div>
+                    <div class="day-item"><div class="day-num">30</div><div class="day-info"><h4>N-Body 模拟</h4><p>综合应用所有技术</p></div><div class="day-guide">综合</div></div>
+                </div>
+            </div>
+
+            <!-- Week 6 -->
+            <div class="week-block">
+                <div class="week-header">
+                    <span class="week-title">Week 6: 性能优化与 APOD</span>
+                    <span class="week-tag tag-advanced">高级 · Day 31-37</span>
+                </div>
+                <div class="day-list">
+                    <div class="day-item"><div class="day-num">31</div><div class="day-info"><h4>性能度量</h4><p>理论/有效带宽计算, CPU vs GPU 计时, throughput</p></div><div class="day-guide">BPG 9</div></div>
+                    <div class="day-item"><div class="day-num">32</div><div class="day-info"><h4>APOD 方法论</h4><p>Assess-Parallelize-Optimize-Deploy 全流程, Amdahl/Gustafson</p></div><div class="day-guide">BPG 2.2, 4</div></div>
+                    <div class="day-item"><div class="day-num">33</div><div class="day-info"><h4>Occupancy 优化</h4><p>占用率计算, 寄存器/共享内存影响, launch bounds</p></div><div class="day-guide">PG 8.2.3, BPG 11.1</div></div>
+                    <div class="day-item"><div class="day-num">34</div><div class="day-info"><h4>指令吞吐量</h4><p>原生指令吞吐量, 循环展开, 整数/浮点优化</p></div><div class="day-guide">PG 8.4, BPG 12</div></div>
+                    <div class="day-item"><div class="day-num">35</div><div class="day-info"><h4>控制流优化</h4><p>warp divergence, 分支预测, predicate</p></div><div class="day-guide">BPG 13</div></div>
+                    <div class="day-item"><div class="day-num">36</div><div class="day-info"><h4>数值精度</h4><p>单/双精度, IEEE 754, 浮点非结合性, Kahan 求和</p></div><div class="day-guide">BPG 7.3</div></div>
+                    <div class="day-item"><div class="day-num">37</div><div class="day-info"><h4>优化综合实战</h4><p>端到端优化: profile → 分析 → 优化 → 验证</p></div><div class="day-guide">BPG 8-13</div></div>
+                </div>
+            </div>
+
+            <!-- Week 7 -->
+            <div class="week-block">
+                <div class="week-header">
+                    <span class="week-title">Week 7: 高级并行编程</span>
+                    <span class="week-tag tag-expert">专家 · Day 38-44</span>
+                </div>
+                <div class="day-list">
+                    <div class="day-item"><div class="day-num">38</div><div class="day-info"><h4>Warp Vote/Match</h4><p>__ballot_sync, __all/any/none_sync, match 函数</p></div><div class="day-guide">PG 10.20-10.21</div></div>
+                    <div class="day-item"><div class="day-num">39</div><div class="day-info"><h4>Cooperative Groups</h4><p>thread_block_tile, coalesced group, group collectives</p></div><div class="day-guide">PG Ch12</div></div>
+                    <div class="day-item"><div class="day-num">40</div><div class="day-info"><h4>Tensor Cores / WMMA</h4><p>wmma::fragment, FP16 矩阵乘, 半精度计算</p></div><div class="day-guide">PG 10.24</div></div>
+                    <div class="day-item"><div class="day-num">41</div><div class="day-info"><h4>异步 Barrier</h4><p>arrive/wait 模式, warp specialization, 生产者-消费者</p></div><div class="day-guide">PG 10.26</div></div>
+                    <div class="day-item"><div class="day-num">42</div><div class="day-info"><h4>CUDA Graphs</h4><p>图构建, stream capture, 实例化与更新, 性能优势</p></div><div class="day-guide">PG 6.2.8.7</div></div>
+                    <div class="day-item"><div class="day-num">43</div><div class="day-info"><h4>Unified Memory</h4><p>cudaMallocManaged, 预取, 页迁移, 显存超分</p></div><div class="day-guide">PG Ch20</div></div>
+                    <div class="day-item"><div class="day-num">44</div><div class="day-info"><h4>异步拷贝与流水线</h4><p>memcpy_async, cuda::pipeline, 多级缓冲, TMA</p></div><div class="day-guide">PG 10.27-10.28</div></div>
+                </div>
+            </div>
+
+            <!-- Week 8 -->
+            <div class="week-block">
+                <div class="week-header">
+                    <span class="week-title">Week 8: CUDA 生态系统</span>
+                    <span class="week-tag tag-expert">专家 · Day 45-52</span>
+                </div>
+                <div class="day-list">
+                    <div class="day-item"><div class="day-num">45</div><div class="day-info"><h4>L2 缓存管理</h4><p>L2 持久化访问, access window, 缓存策略</p></div><div class="day-guide">PG 6.2.3</div></div>
+                    <div class="day-item"><div class="day-num">46</div><div class="day-info"><h4>Stream Ordered Allocator</h4><p>cudaMallocAsync, 内存池, 异步分配/释放</p></div><div class="day-guide">PG Ch14</div></div>
+                    <div class="day-item"><div class="day-num">47</div><div class="day-info"><h4>虚拟内存管理</h4><p>物理内存分配, 虚拟地址映射, 内存复用</p></div><div class="day-guide">PG Ch13</div></div>
+                    <div class="day-item"><div class="day-num">48</div><div class="day-info"><h4>nvcc 编译选项</h4><p>PTX, cubin, JIT, -arch/-code/-gencode</p></div><div class="day-guide">PG 6.1, BPG 20</div></div>
+                    <div class="day-item"><div class="day-num">49</div><div class="day-info"><h4>CUB 与 cuDNN</h4><p>CUB 块级/设备级原语, cuDNN 卷积</p></div><div class="day-guide">BPG 6.1</div></div>
+                    <div class="day-item"><div class="day-num">50</div><div class="day-info"><h4>CUDA 调试技术</h4><p>cuda-gdb, cuda-memcheck, printf, assert, race check</p></div><div class="day-guide">BPG 7.2</div></div>
+                    <div class="day-item"><div class="day-num">51</div><div class="day-info"><h4>部署与兼容性</h4><p>CUDA 兼容性, 运行时检测, 错误恢复, 集群管理</p></div><div class="day-guide">BPG 14-18</div></div>
+                    <div class="day-item"><div class="day-num">52</div><div class="day-info"><h4>多上下文与 NUMA</h4><p>多进程 GPU 共享, NUMA 亲和性, 上下文切换</p></div><div class="day-guide">BPG 11.5, 10.4</div></div>
+                </div>
+            </div>
+
+            <!-- Week 9 -->
+            <div class="week-block">
+                <div class="week-header">
+                    <span class="week-title">Week 9: 专家级实战</span>
+                    <span class="week-tag tag-master">大师 · Day 53-60</span>
+                </div>
+                <div class="day-list">
+                    <div class="day-item"><div class="day-num">53</div><div class="day-info"><h4>2D 卷积终极优化</h4><p>常量+共享+异步拷贝, 多版本对比, profile 驱动</p></div><div class="day-guide">BPG 10, 12</div></div>
+                    <div class="day-item"><div class="day-num">54</div><div class="day-info"><h4>N-Body 终极优化</h4><p>共享内存分块+向量化+unroll, 逐层提升</p></div><div class="day-guide">PG 8, BPG 10-12</div></div>
+                    <div class="day-item"><div class="day-num">55</div><div class="day-info"><h4>Tensor Core 矩阵乘法</h4><p>WMMA 16x16x16, FP16 vs FP32, 对比 cuBLAS</p></div><div class="day-guide">PG 10.24</div></div>
+                    <div class="day-item"><div class="day-num">56</div><div class="day-info"><h4>Graph + 流水线优化</h4><p>CUDA Graph + async pipeline, 端到端优化</p></div><div class="day-guide">PG 6.2.8.7, 10.28</div></div>
+                    <div class="day-item"><div class="day-num">57</div><div class="day-info"><h4>高斯模糊完整实现</h4><p>可分离滤波器, 多通道, 边界策略</p></div><div class="day-guide">综合</div></div>
+                    <div class="day-item"><div class="day-num">58</div><div class="day-info"><h4>稀疏矩阵向量乘</h4><p>CSR/ELL 格式, warp 级编程, 负载均衡</p></div><div class="day-guide">BPG 10-12</div></div>
+                    <div class="day-item"><div class="day-num">59</div><div class="day-info"><h4>并行异常检测</h4><p>统计+排序+阈值, APOD 全流程实战</p></div><div class="day-guide">综合</div></div>
+                    <div class="day-item"><div class="day-num">60</div><div class="day-info"><h4>毕业项目: 图像处理管线</h4><p>多 kernel 管线 + Graph 调度 + 性能剖析报告</p></div><div class="day-guide">全部综合</div></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Official Guide Mapping -->
+        <div class="guide-section">
+            <h2>官方指南章节对照</h2>
+            <table class="guide-table">
+                <thead>
+                    <tr>
+                        <th>指南</th>
+                        <th>章节</th>
+                        <th>标题</th>
+                        <th>对应天数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 5</td><td>Programming Model (Kernel, Thread, Memory)</td><td>Day 01-07</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 6.2.4</td><td>Shared Memory</td><td>Day 06, 08-09</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 6.2.8</td><td>Asynchronous Concurrent Execution</td><td>Day 25, 42</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 8</td><td>Performance Guidelines</td><td>Day 31-37</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 10.22</td><td>Warp Shuffle Functions</td><td>Day 23, 38</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 10.24</td><td>Warp Matrix Functions (Tensor Cores)</td><td>Day 40, 55</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 10.26</td><td>Asynchronous Barrier</td><td>Day 41</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 10.27-28</td><td>Async Data Copies (memcpy_async, pipeline)</td><td>Day 44</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 12</td><td>Cooperative Groups</td><td>Day 39</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 13-14</td><td>Virtual Memory + Stream Ordered Allocator</td><td>Day 46-47</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 15</td><td>CUDA Dynamic Parallelism</td><td>Day 24</td></tr>
+                    <tr><td><span class="pg-badge">PG</span></td><td>Ch 20</td><td>Unified Memory Programming</td><td>Day 43</td></tr>
+                    <tr><td><span class="bpg-badge">BPG</span></td><td>Ch 2.2</td><td>APOD (Assess, Parallelize, Optimize, Deploy)</td><td>Day 32</td></tr>
+                    <tr><td><span class="bpg-badge">BPG</span></td><td>Ch 9</td><td>Performance Metrics (Timing, Bandwidth)</td><td>Day 05, 31</td></tr>
+                    <tr><td><span class="bpg-badge">BPG</span></td><td>Ch 10</td><td>Memory Optimizations</td><td>Day 08-14, 45</td></tr>
+                    <tr><td><span class="bpg-badge">BPG</span></td><td>Ch 11</td><td>Execution Configuration (Occupancy)</td><td>Day 33</td></tr>
+                    <tr><td><span class="bpg-badge">BPG</span></td><td>Ch 12-13</td><td>Instruction Opt + Control Flow</td><td>Day 34-35</td></tr>
+                    <tr><td><span class="bpg-badge">BPG</span></td><td>Ch 14-18</td><td>Deploying CUDA Applications</td><td>Day 51</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="progress-section">
+            <h2>学习进度追踪</h2>
+            <p style="color:#718096; margin-bottom:12px;">勾选已完成的天数，追踪你的学习进度</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-stats">
+                <span>已完成: <strong id="completedCount">0</strong> / 60 天</span>
+                <span>进度: <strong id="progressPercent">0%</strong></span>
+            </div>
+            <div class="checklist" id="checklist">
+                <!-- Auto-generated by JavaScript -->
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        <p>CUDA 60 天精通路线 · 基于 NVIDIA 官方 CUDA C++ Programming Guide & Best Practices Guide</p>
+        <p style="margin-top:8px;">每天一个 CUDA 代码，60 天从小白到专家</p>
+    </div>
+
+    <script>
+        // Generate checklist
+        const days = [
+            ['01','Hello CUDA'],['02','设备查询'],['03','向量运算'],['04','错误处理'],
+            ['05','GPU 计时'],['06','点积归约'],['07','综合练习'],['08','共享内存'],
+            ['09','矩阵转置'],['10','常量内存'],['11','纹理内存'],['12','合并访问'],
+            ['13','固定内存'],['14','分块矩阵乘法'],['15','归约优化'],['16','前缀和'],
+            ['17','矩阵乘法进阶'],['18','直方图'],['19','流压缩'],['20','双调排序'],
+            ['21','K-Means'],['22','Warp 编程'],['23','Warp Shuffle'],['24','动态并行'],
+            ['25','流与事件'],['26','多 GPU'],['27','CUDA 库'],['28','Thrust'],
+            ['29','图像卷积'],['30','N-Body'],['31','性能度量'],['32','APOD 方法论'],
+            ['33','Occupancy'],['34','指令吞吐量'],['35','控制流'],['36','数值精度'],
+            ['37','优化综合'],['38','Warp Vote'],['39','Cooperative Groups'],['40','Tensor Cores'],
+            ['41','异步 Barrier'],['42','CUDA Graphs'],['43','Unified Memory'],['44','异步拷贝'],
+            ['45','L2 缓存'],['46','Stream Allocator'],['47','虚拟内存'],['48','nvcc 编译'],
+            ['49','CUB/cuDNN'],['50','调试技术'],['51','部署兼容性'],['52','多上下文'],
+            ['53','卷积优化'],['54','N-Body 优化'],['55','Tensor 矩阵乘'],['56','Graph 流水线'],
+            ['57','高斯模糊'],['58','稀疏矩阵乘'],['59','异常检测'],['60','毕业项目']
+        ];
+
+        const checklist = document.getElementById('checklist');
+        days.forEach(([num, title]) => {
+            const label = document.createElement('label');
+            label.innerHTML = `<input type="checkbox" data-day="${num}"><span>Day ${num}: ${title}</span>`;
+            checklist.appendChild(label);
+        });
+
+        // Progress tracking
+        const checkboxes = document.querySelectorAll('input[type="checkbox"][data-day]');
+        const progressFill = document.getElementById('progressFill');
+        const completedCount = document.getElementById('completedCount');
+        const progressPercent = document.getElementById('progressPercent');
+
+        // Load from localStorage
+        const saved = JSON.parse(localStorage.getItem('cuda60_progress') || '{}');
+        checkboxes.forEach(cb => {
+            if (saved[cb.dataset.day]) {
+                cb.checked = true;
+            }
+            cb.addEventListener('change', () => {
+                saved[cb.dataset.day] = cb.checked;
+                localStorage.setItem('cuda60_progress', JSON.stringify(saved));
+                updateProgress();
+            });
+        });
+
+        function updateProgress() {
+            const completed = checkboxes.length > 0 ? Array.from(checkboxes).filter(cb => cb.checked).length : 0;
+            const total = checkboxes.length;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            progressFill.style.width = percent + '%';
+            completedCount.textContent = completed;
+            progressPercent.textContent = percent + '%';
+        }
+        updateProgress();
+    </script>
+</body>
+</html>
